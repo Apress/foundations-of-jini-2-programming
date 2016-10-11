@@ -1,0 +1,128 @@
+<!-- 
+     Project name must be the same as the filename which must
+     be the same as the main.class. Builds jar files with the
+     same name
+  -->
+ 
+<project name="ws.TestWSClient">
+
+    <!-- Inherits properties from ../build.xml:
+         jini.home
+         jini.jars
+         src
+         dist
+         build
+         httpd.classes
+      -->
+
+    <!-- axis home -->
+    <property name="axis.home"
+              value="/usr/local/axis-1_3"/>
+    <property name ="java2wsdl"
+              value="org.apache.axis.wsdl.Java2WSDL"/>
+    <property name="wsdl2java"
+              value="org.apache.axis.wsdl.WSDL2Java"/>
+
+    <!-- files for this project --> 
+    <!-- Source files for the server -->
+    <property name="src.files"   
+              value="
+                     ws/TestWSClient.java
+                     common/MIMEType.java,
+                     common/FileClassifier.java,
+                     rmi/RemoteFileClassifier.java,
+                     rmi/FileClassifierImpl.java,
+                    "/>
+
+    <!-- Class files to run the server -->
+    <property name="class.files" 
+              value="
+                     ws/TestWSClient.class
+                     common/MIMEType.class,
+                     common/FileClassifier.class,
+                     rmi/RemoteFileClassifier.class,
+                     rmi/FileClassifierImpl.class,
+                    "/>
+
+    <!-- Class files for the client to download -->
+    <property name="class.files.dl" 
+              value="
+                    "/>
+
+    <!-- Uncomment if no class files downloaded to the client -->
+    <property name="no-dl" value="true"/>
+
+    <!-- derived names - may be changed -->
+    <property name="jar.file"    
+              value="${ant.project.name}.jar"/>
+    <property name="jar.file.dl"    
+              value="${ant.project.name}-dl.jar"/>
+    <property name="main.class"
+              value="${ant.project.name}"/>
+    <property name="codebase"
+              value="http://${localhost}/classes/${jar.file.dl}"/>
+    <property name="axis.jars"
+              value="${axis.home}/lib/axis.jar:${axis.home}/lib/jaxrpc.jar:${axis.home}/lib/commons-logging-1.0.4.jar:${axis.home}/lib/commons-discovery-0.2.jar:${axis.home}/lib/wsdl4j-1.5.1.jar:${axis.home}/lib/saaj.jar"/>
+
+
+    <!-- targets -->
+    <target name="all" depends="compile"/> 
+
+    <target name="gen-files">
+	<java classname="${java2wsdl}"
+              fork="true"
+	      classpath="${axis.jars}:${build}">
+             <arg value="-o"/>
+                <arg value="FileClassifier.wsdl"/>
+             <arg value="-l"/>
+                <arg value="http://localhost/wstk/services/FileClassifier"/>
+             <arg value="common.FileClassifier"/>
+        </java>
+
+	<java classname="${wsdl2java}"
+              fork="true"
+	      classpath="${axis.jars}:${build}">
+             <arg value="-o"/>
+                <arg value="tmpdir"/>
+              <arg value="FileClassifier.wsdl"/>
+        </java>
+    </target>
+
+    <target name="compile">
+	<javac destdir="${build}" srcdir="${src}" 
+	       classpath="${jini.jars}:${axis.jars}"
+               includes="${src.files}">
+        </javac>
+    </target>
+
+    <target name="dist" depends="compile"
+            description="generate the distribution">
+	<jar jarfile="${dist}/${jar.file}"
+             basedir="${build}"
+	     includes="${class.files}"/>
+        <antcall target="dist-jar-dl"/>
+    </target>
+
+    <target name="dist-jar-dl" unless="no-dl">
+	<jar jarfile="${dist}/${jar.file.dl}"
+             basedir="${build}"
+	     includes="${class.files.dl}"/>
+    </target>
+
+    <target name="build" depends="dist,compile"/>
+
+    <target name="run" depends="deploy">
+	<java classname="${main.class}"
+              fork="true"
+	      classpath="${jini.jars}:${dist}/${jar.file}:${axis.jars}">
+             <jvmarg value="-Djava.rmi.server.codebase=${codebase}"/>
+             <jvmarg value="-Djava.security.policy=${res}/policy.all"/>
+	     <arg value="${config}"/>
+        </java>
+    </target>
+
+    <target name="deploy" depends="dist" unless="no-dl">
+        <copy file="${dist}/${jar.file.dl}"
+              todir="${httpd.classes}"/>
+    </target>
+</project>

@@ -1,0 +1,98 @@
+<!-- 
+     Project name must be the same as the filename which must
+     be the same as the main.class. Builds jar files with the
+     same name
+  -->
+ 
+<project name="complete.FileClassifierServer">
+
+    <!-- Inherits properties from ../build.xml:
+         jini.home
+         jini.jars
+         src
+         dist
+         build
+         httpd.classes
+         localhost
+      -->
+
+    <!-- files for this project --> 
+    <!-- Source files for the server -->
+    <property name="src.files"   
+              value="
+                     common/MIMEType.java,
+                     common/FileClassifier.java,
+                     complete/FileClassifierImpl.java,
+                     complete/FileClassifierServer.java
+                    "/>
+
+    <!-- Class files to run the server -->
+    <property name="class.files" 
+              value="
+                     common/MIMEType.class,
+                     common/FileClassifier.class,
+                     complete/FileClassifierImpl.class,
+                     complete/FileClassifierServer.class
+                    "/>
+
+    <!-- Class files for the client to download -->
+    <property name="class.files.dl" 
+              value="
+                     common/MIMEType.class,
+                     common/FileClassifier.class,
+                     complete/FileClassifierImpl.class
+                    "/>
+
+    <!-- Uncomment if no class files downloaded to the client -->
+    <!-- <property name="no-dl" value="true"/> -->
+
+    <!-- derived names - may be changed -->
+    <property name="jar.file"    
+              value="${ant.project.name}.jar"/>
+    <property name="jar.file.dl"    
+              value="${ant.project.name}-dl.jar"/>
+    <property name="main.class"
+              value="${ant.project.name}"/>
+    <property name="codebase"
+              value="http://${localhost}/classes/${jar.file.dl}"/>
+
+    <!-- targets -->
+    <target name="all" depends="compile"/> 
+
+    <target name="compile">
+	<javac destdir="${build}" srcdir="${src}" 
+	       classpath="${jini.jars}"
+               includes="${src.files}">
+        </javac>
+    </target>
+
+    <target name="dist" depends="compile"
+            description="generate the distribution">
+	<jar jarfile="${dist}/${jar.file}"
+             basedir="${build}"
+	     includes="${class.files}"/>
+        <antcall target="dist-jar-dl"/>
+    </target>
+
+    <target name="dist-jar-dl" unless="no-dl">
+	<jar jarfile="${dist}/${jar.file.dl}"
+             basedir="${build}"
+	     includes="${class.files.dl}"/>
+    </target>
+
+    <target name="build" depends="dist,compile"/>
+
+    <target name="run" depends="build,deploy">
+	<java classname="${main.class}"
+              fork="true"
+	      classpath="${jini.jars}:${dist}/${jar.file}">
+             <jvmarg value="-Djava.security.policy=${res}/policy.all"/>
+             <jvmarg value="-Djava.rmi.server.codebase=${codebase}"/>
+        </java>
+    </target>
+
+    <target name="deploy" depends="dist" unless="no-dl">
+        <copy file="${dist}/${jar.file.dl}"
+              todir="${httpd.classes}"/>
+    </target>
+</project>

@@ -1,0 +1,105 @@
+<!-- 
+     Project name must be the same as the filename which must
+     be the same as the main.class. Builds jar files with the
+     same name
+  -->
+ 
+<project name="servlet.FileClassifierServlet">
+
+    <!-- Inherits properties from ../build.xml:
+         jini.home
+         jini.jars
+         src
+         dist
+         build
+         httpd.classes
+      -->
+
+    <!-- home for Apache Tomcat -->
+    <property name="tomcat.home"
+              value="/usr/local/apache-tomcat-5.5.15"/>
+
+    <!-- files for this project --> 
+    <!-- Source files for the server -->
+    <property name="src.files"   
+              value="
+                     common/MIMEType.java,
+                     common/FileClassifier.java,
+                     servlet/FileClassifierServlet.java
+                    "/>
+
+    <!-- Class files to run the server -->
+    <property name="class.files" 
+              value="
+                     common/MIMEType.class,
+                     common/FileClassifier.class,
+                     servlet/FileClassifierServlet.class
+                    "/>
+
+    <!-- Class files for the client to download -->
+    <property name="class.files.dl" 
+              value="
+                     rmi/RemoteFileClassifier.class,
+                     rmi/FileClassifierImpl.class
+                    "/>
+
+    <!-- Uncomment if no class files downloaded to the client -->
+    <property name="no-dl" value="true"/>
+
+    <!-- derived names - may be changed -->
+    <property name="jar.file"    
+              value="${ant.project.name}.jar"/>
+    <property name="war.file"    
+              value="${ant.project.name}.war"/>
+    <property name="jar.file.dl"    
+              value="${ant.project.name}-dl.jar"/>
+    <property name="main.class"
+              value="${ant.project.name}"/>
+    <property name="servlet.jar"
+              value="${tomcat.home}/common/lib/servlet-api.jar"/>
+    <property name="codebase"
+              value="http://${localhost}/classes/${jar.file.dl}"/>
+
+
+    <!-- targets -->
+    <target name="all" depends="compile"/> 
+
+    <target name="compile">
+	<javac destdir="${build}" srcdir="${src}" 
+	       classpath="${jini.jars}:${servlet.jar}"
+               includes="${src.files}">
+        </javac>
+    </target>
+
+    <target name="dist" depends="compile"
+            description="generate the distribution">
+	<jar jarfile="${dist}/${jar.file}"
+             basedir="${build}"
+	     includes="${class.files}"/>
+        <war warfile="${dist}/${war.file}"
+             basedir="${build}"
+	     includes="${class.files}"
+             webxml="${src}/servlet/web.xml"
+             />
+        <antcall target="dist-jar-dl"/>
+    </target>
+
+    <target name="dist-jar-dl" unless="no-dl">
+	<jar jarfile="${dist}/${jar.file.dl}"
+             basedir="${build}"
+	     includes="${class.files.dl}"/>
+    </target>
+
+    <target name="build" depends="dist,compile"/>
+
+    <target name="run" depends="deploy">
+        <echo message="No run cmd, called by servlet engine"/>
+    </target>
+
+    <target name="deploy" depends="dist">
+<!--
+        <copy file="${dist}/${jar.file}"
+              todir="${tomcat.home}/webapps/jini/WEB-INF/lib"/>
+-->
+    </target>
+</project>

@@ -1,0 +1,452 @@
+# set -x
+
+HOSTNAME=localhost
+
+DO_DEBUG=
+
+if [ -z "$DO_DEBUG" ]
+then
+    DEBUG=
+else
+    DEBUG=" -Djava.security.debug=access"
+fi
+
+# JINI_HOME=/home/jan/tmpdir/jini1_0_1
+# JINI_HOME=/usr/local/jini1_1
+JINI_HOME=/usr/local/jini2_0
+
+RCX_PKG=/usr/local/src/rcx.zip
+COMMAPI=/usr/local/src/commapi/comm.jar
+# COMMAPI=/home/jan/projects/jini/tankdemo/serialcomm/comm.jar
+UI=/home/httpd/html/java/jini/uiapi100.zip
+# RXTX=/usr/local/src/jdk1.3/jre/lib/ext/jcl.jar
+RXTX=/usr/local/src/jdk1.3/lib/jcl.jar
+
+# where libSerial.so is (for comm's port with RCX)
+export LD_LIBRARY_PATH=/usr/lib:$LD_IBRARY_PATH
+
+# export CLASSPATH=.:$JINI_HOME/lib/reggie.jar:$JINI_HOME/lib/jini-core.jar:$JINI_HOME/lib/jini-ext.jar:$JINI_HOME/lib/sun-util.jar:$RCX_PKG:$CLASSPATH
+export CLASSPATH=.:../sap:$JINI_HOME/lib/jini-core.jar:$JINI_HOME/lib/jini-ext.jar:$JINI_HOME/lib/sun-util.jar:$RCX_PKG:$COMMAPI:$UI:$RXTX
+
+case $1 in
+findunicastlookup) 
+	class=basic.UnicastRegister
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Dnet.jini.discovery.debug=1 \
+     -Djava.rmi.server.logCalls=true "
+	;;
+findlookup) 
+	class=basic.MulticastRegister
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Dnet.jini.discovery.debug=1 \
+     -Djava.rmi.server.logCalls=true "
+	;;
+simpleservice) 
+	class=basic.SimpleService
+	args="-Djava.security.policy=policy.all \
+     $DEBUG \
+     -Dnet.jini.discovery.debug=1 \
+     -Djava.rmi.server.logCalls=true "
+	;;
+client) 
+	class=client.TestFileClassifier
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Dnet.jini.discovery.debug=1 \
+     -Djava.rmi.server.logCalls=true "
+	;;
+unicastclient) 
+	class=client.TestUnicastFileClassifier
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Dnet.jini.discovery.debug=1 \
+     -Djava.rmi.server.logCalls=true "
+	;;
+complete) 
+	class=complete.FileClassifierServer
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Dnet.jini.discovery.debug=1 \
+     -Djava.rmi.server.logCalls=true "
+	;;
+
+completeID) 
+	class=complete.FileClassifierServerID
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Dnet.jini.discovery.debug=1 \
+     -Djava.rmi.server.logCalls=true "
+	;;
+
+completeconfigID) 
+	class=complete.FileClassifierServerConfig
+	classargs="config/serviceid.config" \
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Dnet.jini.discovery.debug=1 \
+     -Djava.rmi.server.logCalls=true "
+	;;
+
+genericserver) 
+	class=config.GenericServer \
+	classargs="config/generic.config" \
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Dnet.jini.discovery.debug=1 \
+     -Djava.rmi.server.logCalls=true "
+	;;
+
+rmi) 
+	#if ps | grep -s rmiregistry 
+	#then
+	#    true
+	#else
+	#    rmiregistry &
+	#fi
+	class=rmi.FileClassifierServer
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.security.policy=policy.service \
+     -Dnet.jini.discovery.debug=1 \
+     -Djava.rmi.server.logCalls=true "
+	;;
+joinmgr)
+	class=joinmgr.FileClassifierServer
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+server1)
+	class=complex.Server1
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+server2)
+	class=complex.Server2
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+server3)
+	class=complex.Server3
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+complexfile) 
+	class=complex.FileClassifierServer
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+serverrmi) 
+	class=rmi.FileClassifierServerRMI
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.security.policy=policy.all \
+     -Djava.rmi.server.logCalls=true "
+	;;
+speed) 
+	class=complex.PrinterServerSpeed
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.security.policy=policy.all \
+     -Djava.rmi.server.logCalls=true "
+	;;
+distance) 
+	class=complex.PrinterServerLocation
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.security.policy=policy.all \
+     -Djava.rmi.server.logCalls=true "
+	;;
+lease)
+	class=lease.FileClassifierServer
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.security.policy=policy.all \
+     -Djava.rmi.server.logCalls=true "
+	;;
+rcx)
+	class=rcx.jini.RCXServer
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+rcxclient)
+	class=client.TestRCX
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.security.policy=policy.all \
+     -Djava.rmi.server.logCalls=true "
+	;;
+rcxstandalone)
+	class=standalone.TestRCX
+	args="$DEBUG"
+	;;
+rcx2)
+	class=rcx.jini.RCXServer2
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+rcxclient2)
+	class=client.TestRCX2
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+rcxclient3)
+	class=client.TestRCX3
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+heart)
+	class=heart.HeartServer
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+heartclient)
+	class=heart.HeartClient
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+txn)
+	class=txn.FileClassifierServer
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+txnaccounts)
+	class=txn.AccountsServer
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+txnclient)
+	class=client.TestTxn
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Dnet.jini.discovery.debug=1 \
+     -Djava.rmi.server.logCalls=true \
+     -Dcom.sun.jini.reggie.proxy.debug=1"
+	;;
+observer)
+        class=client.ReggieMonitor
+	classargs="jeri/jeri.config" \
+        args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.security.policy=policy.all"
+        ;;                                    
+attackLUS)
+        class=hostile.AttackLUS
+        args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.security.policy=policy.client"
+        ;;                                    
+socket)
+	class=socket.FileClassifierServer
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+extended)
+	class=extended.FileClassifierServer
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+allcast)
+	class=discoverymgt.AllcastRegister
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+immediate)
+	class=client.ImmediateClientLookup
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+cached)
+	class=client.CachedClientLookup
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+serviceobserver)
+	class=client.ServiceMonitor
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+activation)
+	class="activation.FileClassifierServer -Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/" 
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.security.policy=policy.all \
+     -Djava.rmi.server.logCalls=true "
+	;;
+activationmutable)
+	class="activation.FileClassifierServerMutable -Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/" 
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.security.policy=policy.all \
+     -Djava.rmi.server.logCalls=true "
+	;;
+activationlease)
+	class="activation.FileClassifierServerLease -Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/" 
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.security.policy=policy.all \
+     -Djava.rmi.server.logCalls=true "
+	;;
+activationdiscovery)
+	class="activation.FileClassifierServerDiscovery -Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/" 
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.security.policy=policy.all \
+     -Djava.rmi.server.logCalls=true "
+	;;
+buggy)
+	class="activation.Buggy -Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/" 
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.security.policy=policy.all \
+     -Djava.rmi.server.logCalls=true "
+	;;
+htmlui)
+	class=ui.FileClassifierServer
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.service \
+     $DEBUG \
+     -Dnet.jini.discovery.debug=1 \
+     -Djava.rmi.server.logCalls=true "
+	;;
+htmluiclient)
+	class=client.HTMLui
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+frameui)
+	class=ui.FileClassifierServer
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Dnet.jini.discovery.debug=1 \
+     -Djava.rmi.server.logCalls=true "
+	;;
+frameuiclient)
+	class=client.TestFrameUI
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+nameserver)
+	class=nameserver.NameServer
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+getservice)
+	class=nameserver.GetService
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.security.policy=policy.all \
+     -Djava.rmi.server.logCalls=true "
+	;;
+jnlp)
+	class=jnlp.FileClassifierApplication
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Djava.rmi.server.logCalls=true "
+	;;
+corbahelloserver)
+	class="corba.CorbaHelloServer -ORBInitialPort 1200"
+	args=
+	;;
+corbahelloclient)
+	class="corba.CorbaHelloClient -ORBInitialPort 1200"
+	args=
+	;;
+corbajavahelloserver)
+	class=corba.JavaHelloServer
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.security.policy=policy.all \
+     -Djava.rmi.server.logCalls=true "
+	;;
+corbajavahelloclient)
+	class=client.TestCorbaHello
+	args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     $DEBUG \
+     -Djava.security.policy=policy.all \
+     -Djava.rmi.server.logCalls=true "
+	;;
+jeriexportdemo)
+	class="jeri.JeriExportDemo"
+	;;
+rmiimplicitexportdemo)
+	class="jeri.RmiImplicitExportDemo"
+	;;
+rmiexplicitexportdemo)
+	class="jeri.RmiExplicitExportDemo"
+	;;
+*)
+	class="$1"
+        args="-Djava.rmi.server.codebase=http://$HOSTNAME:80/classes/ \
+     -Djava.security.policy=policy.all \
+     $DEBUG \
+     -Dnet.jini.discovery.debug=1 \
+     -Djava.rmi.server.logCalls=true "
+	;;
+esac
+
+#     $DEBUG \
+#     -Dnet.jini.discovery.debug=1 \
+#java -Djava.rmi.server.codebase=file:/home/WWW/htdocs/stubs/ \
+#java -Djava.rmi.server.codebase=file:/home/jan/projects/jini/doc/ \
+
+if [ $0 = "./run" ]
+then 
+    command=java
+else
+    command=jdb
+fi
+$command $args $class $classargs

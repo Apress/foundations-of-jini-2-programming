@@ -1,0 +1,4 @@
+grant {
+    permission java.security.AllPermission "", "";
+    permission java.io.FilePermission "/home/jan/public_html/stubs//-", "read";
+};

@@ -1,0 +1,28 @@
+grant {
+    // rmid wants this
+    permission java.net.SocketPermission "127.0.0.1:1098", "connect,resolve";
+
+    // other RMI calls want these, too
+    permission java.net.SocketPermission "127.0.0.1:1024-", "connect,resolve";
+    permission java.net.SocketPermission "130.102.176.153:1024-", "connect,resolve";
+
+    // access t transaction manager log files
+    permission java.io.FilePermission "/tmp/mahalo_log", "read,write";
+    permission java.io.FilePermission "/tmp/mahalo_log/-", "read,write,delete";
+
+    // properties used by transaction manager
+    permission java.util.PropertyPermission "com.sun.jini.mahalo.managerName", "read";
+    permission java.util.PropertyPermission "com.sun.jini.use.registry", "read";
+
+    // needed for activation
+    permission java.net.SocketPermission "224.0.1.84", "connect,accept,resolve";
+    permission java.io.FilePermission "/tmp/mahalo_log/-", "read";
+    permission java.util.PropertyPermission "com.sun.jini.thread.debug", "read";
+    permission java.lang.RuntimePermission "modifyThreadGroup";
+    permission java.lang.RuntimePermission "modifyThread";
+
+    // for dowloading mahalo-dl.jar from HTTP server
+    permission java.net.SocketPermission "*:8080", "connect,accept,resolve";
+    permission net.jini.discovery.DiscoveryPermission "*";
+};
+

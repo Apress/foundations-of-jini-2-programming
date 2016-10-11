@@ -1,0 +1,164 @@
+<!-- 
+     Project name must be the same as the filename which must
+     be the same as the main.class. Builds jar files with the
+     same name
+  -->
+ 
+<project name="transitive.FindHelloClient">
+
+    <!-- Inherits properties from ../build.xml:
+         jini.home
+         jini.jars
+         src
+         dist
+         build
+         httpd.classes
+      -->
+
+    <!-- files for this project --> 
+    <!-- Source files for the server -->
+    <property name="src.files"   
+              value="
+                     transitive/Hello.java
+                     transitive/HelloImpl.java
+                     transitive/FindHello.java
+                     transitive/FindHelloImpl.java
+                     transitive/FindHelloClient.java
+                    "/>
+
+    <!-- Class files to run the FindHello client -->
+    <property name="class.files" 
+              value="
+                     transitive/Hello.class
+                     transitive/FindHello.class
+                     transitive/FindHelloClient.class
+                    "/>
+
+    <!-- Class files to run the FindHello server -->
+    <property name="class.findhello.files" 
+              value="
+                     transitive/Hello.class
+                     transitive/FindHello.class
+                     transitive/FindHelloImpl.class
+                    "/>
+
+    <!-- Class files to run the Hello server -->
+    <property name="class.hello.files" 
+              value="
+                     transitive/Hello.class
+                     transitive/HelloImpl.class
+                    "/>
+
+    <!-- Class files for the client to download from FindHello -->
+    <property name="class.findhello.files.dl" 
+              value="
+                     transitive/Hello.class
+                     transitive/FindHello.class
+                     transitive/FindHelloImpl.class
+                    "/>
+
+    <!-- Class files for the FindHello service to download from Hello -->
+    <property name="class.hello.files.dl" 
+              value="
+                     transitive/Hello.class
+                     transitive/HelloImpl.class
+                    "/>
+
+    <!-- Uncomment if no class files downloaded to the client -->
+    <!-- <property name="no-dl" value="true"/> -->
+
+    <!-- derived names - may be changed -->
+    <property name="jar.file"    
+              value="${ant.project.name}.jar"/>
+    <property name="jar.hello.file"    
+              value="${ant.project.name}.hello.jar"/>
+    <property name="jar.findhello.file"    
+              value="${ant.project.name}.findhello.jar"/>
+
+    <property name="jar.file.dl"    
+              value="${ant.project.name}-dl.jar"/>
+     <property name="jar.hello.file.dl"    
+              value="${ant.project.name}.hello-dl.jar"/>
+     <property name="jar.findhello.file.dl"    
+              value="${ant.project.name}.findhello-dl.jar"/>
+ 
+   <property name="main.class"
+              value="transitive.FindHelloClient"/>
+   <property name="main.hello.class"
+              value="transitive.HelloImpl"/>
+   <property name="main.findhello.class"
+              value="transitive.FindHelloImpl"/>
+
+    <property name="codebase.hello"
+              value="http://${localhost}/classes/${jar.hello.file.dl}"/>
+    <property name="codebase.findhello"
+              value="http://${localhost}/classes/${jar.findhello.file.dl}"/>
+
+
+    <!-- targets -->
+    <target name="all" depends="compile"/> 
+
+    <target name="compile">
+	<javac destdir="${build}" srcdir="${src}" 
+	       classpath="${jini.jars}"
+               includes="${src.files}">
+        </javac>
+    </target>
+
+    <target name="dist" depends="compile"
+            description="generate the distribution">
+	<jar jarfile="${dist}/${jar.file}"
+             basedir="${build}"
+	     includes="${class.files}"/>
+ 	<jar jarfile="${dist}/${jar.hello.file}"
+             basedir="${build}"
+	     includes="${class.hello.files}"/>
+ 	<jar jarfile="${dist}/${jar.findhello.file}"
+             basedir="${build}"
+	     includes="${class.findhello.files}"/>
+        <antcall target="dist-jar-dl"/>
+    </target>
+
+    <target name="dist-jar-dl" unless="no-dl">
+	<jar jarfile="${dist}/${jar.hello.file.dl}"
+             basedir="${build}"
+	     includes="${class.hello.files.dl}"/>
+	<jar jarfile="${dist}/${jar.findhello.file.dl}"
+             basedir="${build}"
+	     includes="${class.findhello.files.dl}"/>
+    </target>
+
+    <target name="build" depends="dist,compile"/>
+
+    <target name="run" depends="deploy">
+	<java classname="${main.hello.class}"
+              fork="true"
+              spawn="true"
+              classpath="${jini.jars}:${dist}/${jar.hello.file}">
+             <jvmarg value="-Djava.rmi.server.codebase=${codebase.hello}"/>
+             <jvmarg value="-Djava.security.policy=${res}/policy.all"/>
+        </java>
+
+	<java classname="${main.findhello.class}"
+              fork="true"
+
+	      classpath="${jini.jars}:${dist}/${jar.findhello.file}">
+             <jvmarg value="-Djava.rmi.server.codebase=${codebase.findhello}"/>
+             <jvmarg value="-Djava.security.policy=${res}/policy.all"/>
+        </java>
+<!--
+	<java classname="${main.class}"
+              fork="true"
+	      classpath="${jini.jars}:${dist}/${jar.file}">
+             <jvmarg value="-Djava.security.policy=${res}/policy.all"/>
+        </java>
+-->
+    </target>
+
+    <target name="deploy" depends="dist" unless="no-dl">
+        <copy file="${dist}/${jar.hello.file.dl}"
+              todir="${httpd.classes}"/>
+        <copy file="${dist}/${jar.findhello.file.dl}"
+              todir="${httpd.classes}"/>
+    </target>
+</project>

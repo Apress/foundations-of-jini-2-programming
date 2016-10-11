@@ -1,0 +1,101 @@
+<project name="Jini book" default="usage" basedir=".">
+
+    <!-- CONFIGURABLE STUFF HERE -->
+
+    <property name="jini.home" value="/usr/local/jini2_1"/>
+    <property name="localhost" value="jannote.jan.home"/>
+
+    <!-- END CONFIGURABLE STUFF -->
+
+    <!-- Libraries -->
+
+<!--
+   <property name="jini.jars" 
+             value="${jini.home}/lib/jini-core.jar;${jini.home}/lib/jini-ext.jar;${jini.home}/lib/sun-util.jar"/>
+-->
+   <property name="jini.jars" 
+             value="${jini.home}/lib/jsk-platform.jar;${jini.home}/lib/jsk-lib.jar"/>
+
+    <path id="compile.classpath">
+        <pathelement path="${jini.jars}" />
+        <pathelement path="build" />
+    </path>
+
+    <!-- Directories -->
+    <property name="src" value="${basedir}\src"/>
+    <property name="dist" value="${basedir}\dist"/>
+    <property name="build" value="${basedir}\build"/>
+    <property name="res" value="${basedir}/resources"/>
+    <property name="httpd.classes" value="/home/httpd/html/classes/"/>
+
+    <!-- Show the usage options to the user -->
+    <target name="usage" >
+         <echo message=" compile"/>
+         <echo message=" dist"/>
+         <echo message=" build"/>
+         <echo message=" deploy"/>
+         <echo message=" clean"/>
+         <echo message=" run -DrunFile='...' [-Dconfig='...']"/>
+         <echo message=" usage"/>
+    </target>
+
+    <target name="all" depends="init,compile"/> 
+
+    <!-- CLEAN -->
+    <target name="clean">
+ 	<!-- Delete our the ${build}, and ${dist} directory trees -->
+	<delete dir="${build}"/>
+	<delete dir="${dist}"/>
+
+        <!-- delete all ~ backup files -->
+        <delete>
+            <fileset dir="." defaultexcludes="false" includes="**/*~"/>
+        </delete>
+
+        <!-- delete all .bak backup files -->
+        <delete>
+            <fileset dir="." defaultexcludes="false" includes="**/*.bak"/>
+        </delete>
+    </target>
+
+    <target name="init">
+	<!-- Create the build directory structure used by compile N deploy -->
+	<mkdir dir="build"/>
+	<mkdir dir="dist"/>
+    </target>
+
+    <!-- call "compile" target in all build files in "antBuildFiles" dir -->
+    <target name="compile" depends="init">
+        <subant target="compile" inheritall="true">
+            <fileset dir="antBuildFiles"
+                     includes="*.xml"/>
+        </subant>
+    </target>
+
+    <!-- call "dist" target in all build files in "antBuildFiles" dir -->
+    <target name="dist" depends="compile">
+        <subant target="dist" inheritall="true">
+            <fileset dir="antBuildFiles"
+                     includes="*.xml"/>
+        </subant>
+    </target>
+
+    <!-- call "deploy" target in all build files in "antBuildFiles" dir -->
+    <target name="deploy" depends="dist">
+        <subant target="deploy" inheritall="true">
+            <fileset dir="antBuildFiles"
+                     includes="*.xml"
+             />
+        </subant>
+    </target>
+
+    <target name="build" depends="dist,compile"/>
+
+    <!-- call "run" on antfile determined by "runFile" property -->
+    <target name="run">
+         <ant 
+             antfile="antBuildFiles/${runFile}.xml"
+             target="run"/>
+    </target>
+
+</project>

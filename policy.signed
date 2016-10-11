@@ -1,0 +1,57 @@
+keystore "file:/home/jan/.keystore", "JKS";
+
+// Permissions for downloaded classes
+grant signedBy "Jan" {
+    permission java.net.SocketPermission "137.92.11.117:1024-", "connect,accept,resolve";
+};
+
+// Permissions for the Jini classes
+grant codeBase "file:/home/jan/tmpdir/jini1_1/lib/-" signedBy "Jini" {
+    // The Jini classes shouldn't require more than these
+
+    permission java.util.PropertyPermission "net.jini.discovery.*", "read";     
+    permission net.jini.discovery.DiscoveryPermission "*"; 
+    // multicast request address
+    permission java.net.SocketPermission "224.0.1.85", "connect,accept";
+    // multicast announcement address
+    permission java.net.SocketPermission "224.0.1.84", "connect,accept";        
+
+    // RMI and HTTP
+    permission java.net.SocketPermission "127.0.0.1:1024-", "connect,accept";
+    permission java.net.SocketPermission "*.canberra.edu.au:1024-", "connect,accept";
+    permission java.net.SocketPermission "137.92.11.*:1024-", "connect,accept,resolve";
+    permission java.net.SocketPermission "130.102.176.*:1024-", "connect,accept,resolve";
+    permission java.net.SocketPermission "130.102.176.249:1024-", "connect,accept,resolve";
+    // permission java.net.SocketPermission "137.92.11.117:1024-", "connect,accept,resolve";
+
+    // debugging
+    permission java.lang.RuntimePermission "getProtectionDomain"; 
+};
+
+// Permissions for the application classes
+grant codeBase "file:/home/jan/projects/jini/doc/-" {
+    permission java.util.PropertyPermission "net.jini.discovery.*", "read";     
+    permission net.jini.discovery.DiscoveryPermission "*"; 
+    // multicast request address
+    permission java.net.SocketPermission "224.0.1.85", "connect,accept";
+    // multicast announcement address
+    permission java.net.SocketPermission "224.0.1.84", "connect,accept";        
+
+    // RMI and HTTP
+    permission java.net.SocketPermission "127.0.0.1:1024-", "connect,accept";
+    permission java.net.SocketPermission "*.canberra.edu.au:1024-", "connect,accept";
+    permission java.net.SocketPermission "137.92.11.*:1024-", "connect,accept,resolve";
+    permission java.net.SocketPermission "130.102.176.*:1024-", "connect,accept,resolve";
+    permission java.net.SocketPermission "130.102.176.249:1024-", "connect,accept,resolve";
+    // permission java.net.SocketPermission "137.92.11.117:1024-", "connect,accept,resolve";
+
+    // debugging
+    permission java.lang.RuntimePermission "getProtectionDomain"; 
+
+    // Add in any file, etc, permissions needed by the application classes
+};
+
+
+
+
+

@@ -1,0 +1,104 @@
+<project name="activation.FileClassifierServerMutable" default="usage">
+
+    <!-- Inherits properties
+         jini.home
+         jini.jars
+         src
+         dist
+         build
+         httpd.classes
+      -->
+
+    <!-- files for this project --> 
+    <property name="src.files"   
+              value="common/MIMEType.java,
+                     common/FileClassifier.java,
+                     rmi/RemoteFileClassifier.java,
+                     mutable/RemoteFileClassifier.java,
+                     activation/FileClassifierMutable.java
+                     activation/FileClassifierServerMutable.java
+                    "/>
+    <property name="class.files" 
+              value="
+                     common/MIMEType.class,
+                     common/FileClassifier.class,
+                     activation/FileClassifierServerMutable.class
+                    "/>
+    <property name="class.files.dl" 
+              value="
+                     rmi/RemoteFileClassifier.class
+                    "/>
+    <property name="class.files.act" 
+              value="common/MIMEType.class,
+                     common/FileClassifier.class,
+                     rmi/RemoteFileClassifier.class,
+                     activation/FileClassifierMutable.class
+                    "/>
+
+    <!-- <property name="no-dl" value="false"/> -->
+
+    <!-- derived names - may be changed -->
+    <property name="jar.file"    
+              value="${ant.project.name}.jar"/>
+    <property name="jar.file.dl"    
+              value="${ant.project.name}-dl.jar"/>
+    <property name="jar.file.act"    
+              value="${ant.project.name}-act.jar"/>
+    <property name="main.class"
+              value="${ant.project.name}"/>
+   <property name="codebase"
+              value="http://${localhost}/classes/${jar.file.dl}"/>
+
+
+    <property name="jini.jars.start" value="${jini.jars}:${jini.home}/lib/start.jar"/>
+
+    <!-- targets -->
+    <target name="all" depends="compile"/> 
+
+    <target name="compile">
+	<javac destdir="${build}" srcdir="${src}" 
+	       classpath="${jini.jars.start}"
+               includes="${src.files}">
+        </javac>
+    </target>
+
+    <target name="dist" depends="compile"
+            description="generate the distribution">
+	<jar jarfile="${dist}/${jar.file}"
+             basedir="${build}"
+	     includes="${class.files}"/>
+	<jar jarfile="${dist}/${jar.file.act}"
+             basedir="${build}"
+	     includes="${class.files.act}"/>
+        <antcall target="dist-jar-dl"/>
+    </target>
+
+    <target name="dist-jar-dl" unless="no-dl">
+<!--
+        <rmic base="${build}" 
+              includes="activation/FileClassifierImpl.class"/>
+-->
+	<jar jarfile="${dist}/${jar.file.dl}"
+             basedir="${build}"
+	     includes="${class.files.dl}"/>
+    </target>
+
+    <target name="build" depends="dist,compile"/>
+
+    <target name="run" depends="build">
+	<java classname="${main.class}"
+              fork="true"
+	      classpath="${jini.jars}:${dist}/${jar.file}">
+             <jvmarg value="-Djava.security.policy=${res}/policy.all"/>
+             <jvmarg value="-Djava.rmi.server.codebase=${codebase}"/>
+             <!-- <jvmarg value="-Djava.security.debug=access"/> -->
+        </java>
+    </target>
+
+    <target name="deploy" depends="dist" unless="no-dl">
+        <copy file="${dist}/${jar.file.dl}"
+              todir="${httpd.classes}"/>
+        <copy file="${dist}/${jar.file}"
+              todir="${httpd.classes}"/>
+    </target>
+</project>

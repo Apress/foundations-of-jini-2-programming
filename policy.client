@@ -1,0 +1,25 @@
+grant {
+    permission net.jini.discovery.DiscoveryPermission "*";
+
+    // multicast request address
+    permission java.net.SocketPermission "224.0.1.85", "connect,accept";
+    // multicast announcement address
+    permission java.net.SocketPermission "224.0.1.84", "connect,accept";
+
+    // RMI connections
+    // DANGER
+    // HTTP connections - this is where external code may come in - careful!!!
+    permission java.net.SocketPermission "127.0.0.1:1024-", "connect,accept";
+    permission java.net.SocketPermission "*.canberra.edu.au:1024-", "connect,accept";
+    permission java.net.SocketPermission "130.102.176.249:1024-", "connect,accept";
+
+    // DANGER
+    // HTTP connections - this is where external code may come in - careful!!!
+    permission java.net.SocketPermission "127.0.0.1:80", "connect,accept";
+    permission java.net.SocketPermission "*.dstc.edu.au:80", "connect,accept";
+
+    // reading parameters
+    // like net.jini.discovery.debug!
+    permission java.util.PropertyPermission "net.jini.discovery.*", "read";
+
+};
